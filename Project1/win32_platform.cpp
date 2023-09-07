@@ -1,11 +1,16 @@
 #include <Windows.h>
 
-BITMAPINFO buffer_bitmap_info;
-
-void* buffer_memory;
-int buffer_width;
-int buffer_height;
 bool running = true;
+
+struct Render_State
+{
+	int width, height;
+	void* memory;
+
+	BITMAPINFO bitmap_info;
+};
+
+Render_State render_state;
 
 LRESULT CALLBACK window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -20,20 +25,20 @@ LRESULT CALLBACK window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 			RECT rect;
 			GetClientRect(hwnd, &rect);
 
-			buffer_width = rect.right - rect.left;
-			buffer_height = rect.bottom - rect.top;
+			render_state.width = rect.right - rect.left;
+			render_state.height = rect.bottom - rect.top;
 
-			int buffer_size = buffer_width * buffer_height * sizeof(unsigned int);
+			int size = render_state.width * render_state.height * sizeof(unsigned int);
 
-			if (buffer_memory) { VirtualFree(buffer_memory, 0, MEM_RELEASE); }
-			buffer_memory = VirtualAlloc(0, buffer_size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+			if (render_state.memory) { VirtualFree(render_state.memory, 0, MEM_RELEASE); }
+			render_state.memory = VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
-			buffer_bitmap_info.bmiHeader.biSize = sizeof(buffer_bitmap_info.bmiHeader);
-			buffer_bitmap_info.bmiHeader.biWidth = buffer_width;
-			buffer_bitmap_info.bmiHeader.biHeight = buffer_height;
-			buffer_bitmap_info.bmiHeader.biPlanes = 1;
-			buffer_bitmap_info.bmiHeader.biBitCount = 32;
-			buffer_bitmap_info.bmiHeader.biCompression = BI_RGB;
+			render_state.bitmap_info.bmiHeader.biSize = sizeof(render_state.bitmap_info.bmiHeader);
+			render_state.bitmap_info.bmiHeader.biWidth = render_state.width;
+			render_state.bitmap_info.bmiHeader.biHeight = render_state.height;
+			render_state.bitmap_info.bmiHeader.biPlanes = 1;
+			render_state.bitmap_info.bmiHeader.biBitCount = 32;
+			render_state.bitmap_info.bmiHeader.biCompression = BI_RGB;
 		} break;
 
 		default: { result = DefWindowProc(hwnd, uMsg, wParam, lParam); }
@@ -69,15 +74,15 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		}
 
 		// Update
-		unsigned int* pixel = (unsigned int*)buffer_memory;
-		for (int i = 0; i < buffer_height; i++)
+		unsigned int* pixel = (unsigned int*)render_state.memory;
+		for (int i = 0; i < render_state.height; i++)
 		{
-			for (int j = 0; j < buffer_width; j++)
+			for (int j = 0; j < render_state.width; j++)
 				*pixel++ = 0x000000;
 		}
 
 		// Render
-		StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory,
-			&buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
+		StretchDIBits(hdc, 0, 0, render_state.width, render_state.height, 0, 0, render_state.width, render_state.height, render_state.memory,
+			&render_state.bitmap_info, DIB_RGB_COLORS, SRCCOPY);
 	}
 }
