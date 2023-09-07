@@ -1,6 +1,7 @@
+#include "utilities.cpp"
 #include <Windows.h>
 
-bool running = true;
+global_variable bool running = true;
 
 struct Render_State
 {
@@ -10,7 +11,9 @@ struct Render_State
 	BITMAPINFO bitmap_info;
 };
 
-Render_State render_state;
+global_variable Render_State render_state;
+
+#include "renderer.cpp"
 
 LRESULT CALLBACK window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -28,7 +31,7 @@ LRESULT CALLBACK window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 			render_state.width = rect.right - rect.left;
 			render_state.height = rect.bottom - rect.top;
 
-			int size = render_state.width * render_state.height * sizeof(unsigned int);
+			int size = render_state.width * render_state.height * sizeof(u32);
 
 			if (render_state.memory) { VirtualFree(render_state.memory, 0, MEM_RELEASE); }
 			render_state.memory = VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
@@ -60,7 +63,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
 	// Create window
 	HWND window = CreateWindow(window_class.lpszClassName, "PONG", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, 
-							   CW_USEDEFAULT, 1080, 720, 0, 0, hInstance, 0);
+							   CW_USEDEFAULT, 1280, 720, 0, 0, hInstance, 0);
 	HDC hdc = GetDC(window);
 
 	while (running)
@@ -69,17 +72,27 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		MSG message;
 		while (PeekMessage(&message, window, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage(&message);
-			DispatchMessage(&message);
+			switch (message.message)
+			{
+				case WM_KEYUP:
+				case WM_KEYDOWN:
+				{
+					u32 vk_code = (u32)message.wParam;
+					bool is_down = ((message.lParam & (1 << 31)) == 0);
+				} break;
+
+				default:
+				{
+					TranslateMessage(&message);
+					DispatchMessage(&message);
+				}
+			}
 		}
 
 		// Update
-		unsigned int* pixel = (unsigned int*)render_state.memory;
-		for (int i = 0; i < render_state.height; i++)
-		{
-			for (int j = 0; j < render_state.width; j++)
-				*pixel++ = 0x000000;
-		}
+		//render_background();
+		clear_screen(0x000000);
+		draw_rect(0, 0, 10, 10, 0xffffff);
 
 		// Render
 		StretchDIBits(hdc, 0, 0, render_state.width, render_state.height, 0, 0, render_state.width, render_state.height, render_state.memory,
