@@ -53,51 +53,55 @@ internal void update_game(Input *input, float delta_time)
 
 	update_player(&player_1_pos, &player_1_dp, player_1_ddp, delta_time);
 	update_player(&player_2_pos, &player_2_dp, player_2_ddp, delta_time);
-
-	ball_pos_x += ball_dp_x * delta_time;
-	ball_pos_y += ball_dp_y * delta_time;
-
-	if (aabb_vs_aabb(ball_pos_x, ball_pos_y, ball_half_size, ball_half_size, 80, 
-		player_2_pos, player_half_size_x, player_half_size_y))
+	
+	// Update ball
 	{
-		ball_pos_x = 80.0f - player_half_size_x - ball_half_size;
-		ball_dp_x *= -1;
-		ball_dp_y = (ball_pos_y - player_2_pos) * 2 + player_2_dp * 0.75f;
-	}
-    else if (aabb_vs_aabb(ball_pos_x, ball_pos_y, ball_half_size, ball_half_size, -80,
-				player_1_pos, player_half_size_x, player_half_size_y))
-		     {	 
-				ball_pos_x = -80.0f + player_half_size_x + ball_half_size;
-				ball_dp_x *= -1;
-				ball_dp_y = (ball_pos_y - player_1_pos) * 2 + player_1_dp * 0.75f;
-		     }
+		ball_pos_x += ball_dp_x * delta_time;
+		ball_pos_y += ball_dp_y * delta_time;
 
-	if (ball_pos_y + ball_half_size > arena_half_size_y)
-	{
-		ball_pos_y = arena_half_size_y - ball_half_size;
-		ball_dp_y *= -1.0f;
-	}
-	else if (ball_pos_y - ball_half_size < -arena_half_size_y)
-	{
-		ball_pos_y = -arena_half_size_y + ball_half_size;
-		ball_dp_y *= -1.0f;
+		if (aabb_vs_aabb(ball_pos_x, ball_pos_y, ball_half_size, ball_half_size, 80,
+			player_2_pos, player_half_size_x, player_half_size_y))
+		{
+			ball_pos_x = 80.0f - player_half_size_x - ball_half_size;
+			ball_dp_x *= -1;
+			ball_dp_y = (ball_pos_y - player_2_pos) * 2 + player_2_dp * 0.75f;
+		}
+		else if (aabb_vs_aabb(ball_pos_x, ball_pos_y, ball_half_size, ball_half_size, -80,
+			     player_1_pos, player_half_size_x, player_half_size_y))
+			 {
+				 ball_pos_x = -80.0f + player_half_size_x + ball_half_size;
+				 ball_dp_x *= -1;
+				 ball_dp_y = (ball_pos_y - player_1_pos) * 2 + player_1_dp * 0.75f;
+			 }
+
+		if (ball_pos_y + ball_half_size > arena_half_size_y)
+		{
+			ball_pos_y = arena_half_size_y - ball_half_size;
+			ball_dp_y *= -1.0f;
+		}
+		else if (ball_pos_y - ball_half_size < -arena_half_size_y)
+		{
+			ball_pos_y = -arena_half_size_y + ball_half_size;
+			ball_dp_y *= -1.0f;
+		}
+
+		if (ball_pos_x + ball_half_size > arena_half_size_x)
+		{
+			ball_dp_x *= -1.0f;
+			ball_dp_y = 0;
+			ball_pos_x = 0;
+			ball_pos_y = 0;
+		}
+		else if (ball_pos_x - ball_half_size < -arena_half_size_x)
+		{
+			ball_dp_x *= -1.0f;
+			ball_dp_y = 0;
+			ball_pos_x = 0;
+			ball_pos_y = 0;
+		}
 	}
 
-	if (ball_pos_x + ball_half_size > arena_half_size_x)
-	{
-		ball_dp_x *= -1.0f;
-		ball_dp_y = 0;
-		ball_pos_x = 0;
-		ball_pos_y = 0;
-	}
-	else if (ball_pos_x - ball_half_size < -arena_half_size_x)
-	{
-		ball_dp_x *= -1.0f;
-		ball_dp_y = 0;
-		ball_pos_x = 0;
-		ball_pos_y = 0;
-	}
-
+	// Rendering
 	draw_rect(ball_pos_x, ball_pos_y, 1, 1, 0xffffff);
 
 	draw_rect(80, player_2_pos, player_half_size_x, player_half_size_y, 0xffffff);
