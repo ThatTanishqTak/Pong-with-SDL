@@ -63,8 +63,9 @@ internal void update_game(Input* input, float delta_time)
     if (is_down(BUTTON_UP)) { player_2_ddp += 2000; }
     if (is_down(BUTTON_DOWN)) { player_2_ddp -= 2000; }
 #else
-    if (ball_pos_y > player_2_pos + 2.0f) { player_2_ddp += 1300; }
-    if (ball_pos_y < player_2_pos - 2.0f) { player_2_ddp -= 1300; }
+    player_2_ddp = 1000 * (ball_pos_y - player_2_pos);
+    if (player_2_ddp > 1300) { player_2_ddp = 1300; }
+    if (player_2_ddp < 1300) { player_2_ddp = -1300; }
 #endif
 
     // Update player 1 and player 2 positions and velocities
