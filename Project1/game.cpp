@@ -9,8 +9,9 @@ float arena_half_size_x = 85.0f;
 float arena_half_size_y = 45.0f;
 float player_half_size_x = 2.5f;
 float player_half_size_y = 12.0f;
-float ball_pos_x, ball_pos_y, ball_dp_x = 100.0f, ball_dp_y;
+float ball_pos_x, ball_pos_y, ball_dp_x = 130.0f, ball_dp_y;
 float ball_half_size = 1.0f;
+int player_1_score, player_2_score;
 
 // Function to update player position and velocity
 internal void update_player(float* pos, float* dp, float ddp, float delta_time)
@@ -58,8 +59,13 @@ internal void update_game(Input* input, float delta_time)
 
     // Calculate player 2's desired velocity based on input
     float player_2_ddp = 0.0f;
+#if 0
     if (is_down(BUTTON_UP)) { player_2_ddp += 2000; }
     if (is_down(BUTTON_DOWN)) { player_2_ddp -= 2000; }
+#else
+    if (ball_pos_y > player_2_pos + 2.0f) { player_2_ddp += 1300; }
+    if (ball_pos_y < player_2_pos - 2.0f) { player_2_ddp -= 1300; }
+#endif
 
     // Update player 1 and player 2 positions and velocities
     update_player(&player_1_pos, &player_1_dp, player_1_ddp, delta_time);
@@ -106,6 +112,7 @@ internal void update_game(Input* input, float delta_time)
             ball_dp_y = 0;
             ball_pos_x = 0;
             ball_pos_y = 0;
+            player_1_score++;
         }
         else if (ball_pos_x - ball_half_size < -arena_half_size_x)
         {
@@ -113,7 +120,22 @@ internal void update_game(Input* input, float delta_time)
             ball_dp_y = 0;
             ball_pos_x = 0;
             ball_pos_y = 0;
+            player_2_score++;
         }
+    }
+
+    float at_x = -80;
+    for (int i = 0; i < player_1_score; i++)
+    {
+        draw_rect(at_x, 47.0f, 1.0f, 1.0f, 0x0000ff);
+        at_x += 2.5f;
+    }
+
+    at_x = 80;
+    for (int i = 0; i < player_2_score; i++)
+    {
+        draw_rect(at_x, 47.0f, 1.0f, 1.0f, 0x0000ff);
+        at_x -= 2.5f;
     }
 
     // Rendering: Draw the ball and both player paddles
