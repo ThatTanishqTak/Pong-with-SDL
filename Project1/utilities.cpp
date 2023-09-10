@@ -15,7 +15,7 @@ typedef unsigned long long u64;   // Unsigned 64-bit integer
 // Define an inline function 'clamp' to restrict a value within a specified range
 inline int clamp(int min, int val, int max)
 {
-    // If 'Val' is less than 'min', return 'min'; otherwise, if 'Val' is greater than 'max', return 'max';
+    // If 'Val' is less than 'min', return 'min'; otherwise, if 'Val' is greater than 'max', return 'max'
     // Otherwise, return 'Val' as it falls within the specified range
     if (val < min) { return min; }
     if (val > max) { return max; }
